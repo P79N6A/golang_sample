@@ -23,8 +23,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/lxb31/golang-sample/internal/utils"
-	"github.com/lxb31/golang-sample/pkg/hello"
+	"github.com/lxb31/golang_sample/internal/utils"
+	"github.com/lxb31/golang_sample/pkg/hello"
 )
 
 const (
@@ -85,6 +85,9 @@ func (a *A) Echo(s string) string {
 	return fmt.Sprintf("%v,%v: %v", a.Name, a.Number, s)
 }
 
+// Noop just use varialbe
+func Noop(...interface{}) {}
+
 func main() {
 	msg := hello.NewMessage("hello")
 	//msg.
@@ -98,6 +101,26 @@ func main() {
 	// internal
 	utils.InternalSayHello()
 
+	{
+		/*
+			[值类型]
+			整形:  int8、byte、int16、uint、uintprt等，零值为0
+			浮点: float32、float64，零值为0
+			布尔: bool, 零值为false
+			复数: complex64、complex128，零值为0+0i
+			字符串: string, 零值为”“
+			复合类型: 数组和struct, 递归赋零值
+			[指针和引用] nil
+			pointer, function, interface, error, slice, map, channel
+		*/
+		//slice内部有3个变量, 指向数组的指针/len/cap, 只有这3个变量都为零值时, slice才是零值
+		//通过声明得到的是零值
+		var s []string
+		fmt.Println(len(s), s, s == nil)
+		//通过赋值得到的不是零值
+		var s1 = []string{}
+		fmt.Println(len(s1), s1, s1 == nil)
+	}
 	// const
 	{
 		fmt.Println("[const] =====")
@@ -176,20 +199,29 @@ func main() {
 	* map
 	 */
 	{
-		m1 := map[string]hello.Vertex{}
-		m2 := map[string]hello.Vertex{
+		m1 := map[string]*hello.Vertex{}
+		m2 := map[string]*hello.Vertex{
 			"key1": {X: 10, Y: 11},
 			"key2": {X: 30, Y: 40},
 		}
-		m3 := make(map[string]hello.Vertex)
+		m3 := make(map[string]*hello.Vertex)
 
-		m3["key1"] = hello.Vertex{X: 1, Y: 2}
-		m3["key2"] = hello.Vertex{X: 3, Y: 4}
+		//赋值
+		m3["key1"] = &hello.Vertex{X: 1, Y: 2}
+		m3["key2"] = &hello.Vertex{X: 3, Y: 4}
+		//删除
 		delete(m3, "key1")
-		elem, ok := m3["key1"]
-		fmt.Println(elem, ok)
+		//遍历
 		for key, value := range m3 {
 			fmt.Println(key, value)
+		}
+		//判断是否存在
+		if elem, ok := m3["key1"]; ok {
+			Noop(elem)
+		}
+		//判断存在并且非零值
+		if elem := m3["key1"]; elem != nil {
+			Noop(elem)
 		}
 		fmt.Println(m1, m2, m3)
 	}
@@ -269,11 +301,11 @@ func main() {
 	//type switch
 	{
 		var v interface{} = "value"
-		switch v.(type) {
+		switch value := v.(type) {
 		case int:
-			fmt.Println("type int")
+			fmt.Println("type int", value)
 		case string:
-			fmt.Println("type string")
+			fmt.Println("type string", value)
 		default:
 			fmt.Println("type unknown")
 		}
@@ -509,7 +541,7 @@ func main() {
 	}
 	// file
 	{
-		root := `D:\project\lxb31\golang-sample\src\github.com\lxb31\golang-sample\test\testdata`
+		root := `/Users/liufuliang/project/golang_sample/src/github.com/lxb31/golang_sample/test/testdata`
 		filename := path.Join(root, "file.txt")
 		// ioutil
 		ioutil.ReadFile(filename)
@@ -638,6 +670,33 @@ func main() {
 		methodValue := val.MethodByName("Echo")
 		args := []reflect.Value{reflect.ValueOf("hello")}
 		methodValue.Call(args)
+	}
+
+	{
+		// bad case
+		// 列表遍历时a是同一个内存, 所以取地址内容会变
+		as := []A{
+			{Name: "1", Number: 1},
+			{Name: "2", Number: 2},
+		}
+
+		for _, a := range as {
+			a.Number++
+		}
+		fmt.Println(as[0], as[1])
+	}
+
+	{
+		type P struct {
+			v int
+		}
+		type Q struct {
+			p P
+		}
+		q := Q{p: P{1}}
+
+		(&q.p).v = 2
+		fmt.Println(&q.p)
 	}
 
 }

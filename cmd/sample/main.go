@@ -1,16 +1,21 @@
 package main
 
 import (
+	"code.byted.org/gopkg/env"
 	"fmt"
-
 	_ "github.com/sirupsen/logrus"
-	"github.com/spf13/pflag"
+	"time"
 )
 
 func main() {
-	v1 := pflag.Int("v1", 100, "int value")
-	v2 := pflag.StringP("v2", "v", "default", "string value")
-	pflag.Parse()
-	fmt.Println(*v1, *v2)
+	var s []string
+	fmt.Println(len(s), s, s == nil)
 
+	var s1 = []string{}
+	fmt.Println(len(s1), s1, s1 == nil)
+
+	d, err := time.ParseDuration("10s")
+	fmt.Println(d.Nanoseconds(), err)
+
+	fmt.Println(env.IDC())
 }

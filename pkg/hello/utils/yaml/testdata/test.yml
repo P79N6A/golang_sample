@@ -1,0 +1,8 @@
+group1:
+  k1: "v1"
+group2:
+  k2: 100
+group3:
+  k3: 10s
+group4:
+  k4: true

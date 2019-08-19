@@ -16,7 +16,7 @@ func (q *FifoQueue) Peek() interface{} {
 	return nil
 }
 
-// Poll implements queue.Interface
+// abc Poll implements queue.Interface
 func (q *FifoQueue) Poll() (e interface{}) {
 	if len(*q) > 0 {
 		*q, e = (*q)[1:], (*q)[0]
